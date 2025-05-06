@@ -4,6 +4,7 @@ from CatAgent import CatAgent
 from MouseAgent import MouseAgent
 import numpy as np
 from itertools import product
+import random
 
 def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
     # implements Monte Carlo control
@@ -19,7 +20,28 @@ def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
     q_table_cat = {s: [0.0] * num_actions for s in state_space}
     q_table_mouse = {s: [0.0] * num_actions for s in state_space}
 
-    # here we probably want two policies (for each agent)
+    # policies for our cat and mouse agents defining their behavior
+    # (define them as simple greedy policies for now)
+    # we want our cat to chase the mouse, its going to be super greedy
+    def policy_cat(tired_threshold=40,chase_counter=0):
+        # some random actions to make cat silly
+        if random.uniform(0, 1) < epsilon:
+            return random.choice(CatAgent.action_space), chase_counter  # Explore
+        # cat is done playing when it gets tired
+        elif chase_counter >= tired_threshold:
+            CatAgent.x_velocity = 0
+            CatAgent.y_velocity = 0
+            return (0,0,0)
+        else:
+            return np.argmax(q_table_cat[CatAgent.pos]), chase_counter # Exploit
+    
+    # policy for mouse agent
+    # we want the mouse to avoid cat and also be random, it be more exploratory
+    def policy_mouse():
+        if random.uniform(0, 1) < epsilon/2:
+            return random.choice(MouseAgent.action_space)  # Explore
+        else:
+            return np.argmax(q_table_mouse[MouseAgent.pos])  # Exploit
 
     returns_cat = {sa: [] for sa in action_states}
     returns_mouse = {sa: [] for sa in action_states}
@@ -94,4 +116,6 @@ if __name__ == '__main__':
 
     # create environment
     env = Environment(g, cat_agent, mouse_agent)
+
+    # get the agents to actually do stuff
 
