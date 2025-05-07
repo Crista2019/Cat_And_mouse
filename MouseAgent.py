@@ -4,7 +4,7 @@ def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are positive and less than 5
     # we never want the mouse to stop moving!
-    if 1 <= vel < 5:
+    if 0 <= vel < 5:
         return True
     return False
 
@@ -44,7 +44,6 @@ class MouseAgent:
             new_y_vel = y_change
         else:
             new_y_vel = self.y_velocity
-
 
         return new_x_vel, new_y_vel
 

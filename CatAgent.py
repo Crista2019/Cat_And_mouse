@@ -3,7 +3,7 @@ from itertools import product
 def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are non-negative and less than 3
-    if 0 <= vel < 5:
+    if 0 <= vel < 3:
         return True
     return False
 
@@ -19,9 +19,12 @@ class CatAgent:
         # there are nine possible actions for changing x and y by -1,0,1
         self.action_space = list(product(list(product([-1, 0, 1], ["x"])), list(product([-1, 0, 1], ["y"]))))
 
-        # how many squares to move up and right in a turn
+        # how many squares to move up/down and left/right in a turn
         self.x_velocity = 0
         self.y_velocity = 0
+
+        # start out not tired - increases with movement but doubled with no interaction
+        self.tired_factor = 0
 
     def update_velocity(self, action):
         # updates based on the action taken
