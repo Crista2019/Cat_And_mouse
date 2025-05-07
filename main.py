@@ -1,10 +1,29 @@
+# local imports
 from Gridworld import Gridworld
 from Environment import Environment
 from CatAgent import CatAgent
 from MouseAgent import MouseAgent
+# math tools
 import numpy as np
 from itertools import product
 import random
+# visualization tools
+import cv2
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+def grids_to_video(grids, output_file='output.mp4', fps=5):
+    # transform list of grids (gridworld.grid arrays) into a video file
+    fig, ax = plt.subplots()
+    im = ax.imshow(grids[0], animated=True)
+
+    def update_fig(i):
+        im.set_array(grids[i])
+        return im,
+
+    ani = animation.FuncAnimation(fig, update_fig, frames=len(grids), interval=1000/fps, blit=True)
+    ani.save(output_file, writer='ffmpeg', fps=fps)
+    plt.close(fig)
 
 def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
     # implements Monte Carlo control
@@ -118,4 +137,8 @@ if __name__ == '__main__':
     env = Environment(g, cat_agent, mouse_agent)
 
     # get the agents to actually do stuff
+
+    # visualize the run
+    grids = None
+    grids_to_video(grids, output_file='random_grids.mp4', fps=5)
 
