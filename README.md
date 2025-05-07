@@ -26,13 +26,14 @@ Points on the grid represent the cat position, the mouse toy position, obstacles
 
 # Set Up Instructions 
 ```
-### necessary imports
-from Gridworld import Gridworld
-from Environment import Environment
-from CatAgent import CatAgent
-from MouseAgent import MouseAgent
-import numpy as np
-import matplotlib.pyplot as plt
+### installing necessary packages
+# math tools
+!pip install numpy
+!pip install itertools
+!pip install random
+# visualization tools
+!pip install opencv-python
+!pip install matplotlib
 ```
 
 # Usage

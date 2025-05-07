@@ -1,5 +1,3 @@
-import numpy as np
-import random
 from itertools import product
 
 def valid_velocity(vel):

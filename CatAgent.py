@@ -1,4 +1,3 @@
-import numpy as np
 from itertools import product
 
 def valid_velocity(vel):

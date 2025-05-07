@@ -67,7 +67,7 @@ def update_q_table(q_values, returns, episode, discount_factor):
 def update_policy_cat(epsilon, cat_agent, q_table_cat, tired_threshold=40, chase_counter=0):
     # some random actions to make cat silly
     if random.uniform(0, 1) < epsilon:
-        return random.choice(cat_agent.action_space), chase_counter  # Explore
+        return random.choice(cat_agent.action_space)  # Explore
     # cat is done playing when it gets tired
     elif chase_counter >= tired_threshold:
         cat_agent.x_velocity = 0
