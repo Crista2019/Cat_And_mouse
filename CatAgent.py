@@ -26,6 +26,11 @@ class CatAgent:
         # start out not tired - increases with movement but doubled with no interaction
         self.tired_factor = 0
 
+    def reset(self):
+        self.x_velocity = 0
+        self.y_velocity = 0
+        self.tired_factor = 0
+
     def update_velocity(self, action):
         # updates based on the action taken
         # in form ((#int, 'x'), (#int, 'y'))

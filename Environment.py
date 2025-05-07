@@ -12,6 +12,11 @@ class Environment(object):
         # the row and column indices for the nonzero grid spaces
         self.full_state_space = [tuple(i) for i in np.transpose(np.nonzero(self.gridworld.grid))]
 
+    def reset(self):
+        self.gridworld.reset()
+        self.cat.reset()
+        self.mouse.reset()
+
     def cat_reward(self, prev_pos, new_pos, tired_factor):
         # if the cat gets tired, we are done (to avoid infinite play, which is ideal but not realistic)
         if tired_factor >= 100:

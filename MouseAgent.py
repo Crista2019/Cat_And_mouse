@@ -25,6 +25,10 @@ class MouseAgent:
         self.x_velocity = 0
         self.y_velocity = 0
 
+    def reset(self):
+        self.x_velocity = 0
+        self.y_velocity = 0
+
     def update_velocity(self, action):
         # updates based on the action taken
         # in form ((#int, 'x'), (#int, 'y'))

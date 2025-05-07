@@ -56,6 +56,7 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
     all_episodes = []
     for _ in range(n):
         # reset the cat and mouse
+        cat.pos
         # run one episode to obtain the state/action/reward combo
         episode = run_episode(policy_cat, policy_mouse, environment)
         all_episodes.append(episode)
@@ -144,7 +145,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=1)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=10)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -173,8 +174,9 @@ if __name__ == '__main__':
     original_g = copy.deepcopy(g.grid)
     grids = [original_g]
     # visualize the run
-    for ep in range(len(cat_pos_all)):
-        for i in range(len(cat_pos_all[0])):
+    for ep in range(len(all_episodes)):
+        for i in range(len(all_episodes[ep])):
+            print(ep,i)
             new_g = copy.deepcopy(original_g)
             new_g[np.nonzero(original_g)] = 1
             new_g[cat_pos_all[ep][i]] = 2
