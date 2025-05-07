@@ -25,7 +25,7 @@ def grids_to_video(grids, output_file='output.mp4', fps=5):
     ani.save(output_file, writer='ffmpeg', fps=fps)
     plt.close(fig)
 
-def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
+def control_func(environment, cat_agent, mouse_agent, n=1000, discount_factor=0.99, epsilon=0.1):
     # implements Monte Carlo control
     # reverse so these are x,y pairs
     state_space = [(s[1], s[0]) for s in env.full_state_space]
@@ -38,29 +38,6 @@ def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
     # separate Q tables for cat and mouse
     q_table_cat = {s: [0.0] * num_actions for s in state_space}
     q_table_mouse = {s: [0.0] * num_actions for s in state_space}
-
-    # policies for our cat and mouse agents defining their behavior
-    # (define them as simple greedy policies for now)
-    # we want our cat to chase the mouse, its going to be super greedy
-    def policy_cat(tired_threshold=40,chase_counter=0):
-        # some random actions to make cat silly
-        if random.uniform(0, 1) < epsilon:
-            return random.choice(CatAgent.action_space), chase_counter  # Explore
-        # cat is done playing when it gets tired
-        elif chase_counter >= tired_threshold:
-            CatAgent.x_velocity = 0
-            CatAgent.y_velocity = 0
-            return (0,0,0)
-        else:
-            return np.argmax(q_table_cat[CatAgent.pos]), chase_counter # Exploit
-    
-    # policy for mouse agent
-    # we want the mouse to avoid cat and also be random, it be more exploratory
-    def policy_mouse():
-        if random.uniform(0, 1) < epsilon/2:
-            return random.choice(MouseAgent.action_space)  # Explore
-        else:
-            return np.argmax(q_table_mouse[MouseAgent.pos])  # Exploit
 
     returns_cat = {sa: [] for sa in action_states}
     returns_mouse = {sa: [] for sa in action_states}
@@ -76,16 +53,36 @@ def control_func(environment, n=1000, discount_factor=0.99, epsilon=0.1):
         q_table_mouse = update_q_table(policy_mouse, returns_mouse, episode[1], discount_factor)
 
         # use q values to update our policy
-        policy_cat = update_policy(policy_cat, state_space, num_actions, q_table_cat, epsilon)
-        policy_mouse = update_policy(policy_mouse, state_space, num_actions, q_table_mouse, epsilon)
+        policy_cat = update_policy_cat(policy_cat, state_space, num_actions, q_table_cat, epsilon)
+        policy_mouse = update_policy_mouse(policy_mouse, state_space, num_actions, q_table_mouse, epsilon)
 
     return policy_cat, q_table_cat, policy_mouse, q_table_mouse
 
 def update_q_table(q_values, returns, episode, discount_factor):
     pass
 
-def update_policy(policy, state_space, num_actions, q_table, epsilon):
-    pass
+    # policies for our cat and mouse agents defining their behavior
+    # (define them as simple greedy policies for now)
+    # we want our cat to chase the mouse, its going to be super greedy
+def update_policy_cat(epsilon, cat_agent, q_table_cat, tired_threshold=40, chase_counter=0):
+    # some random actions to make cat silly
+    if random.uniform(0, 1) < epsilon:
+        return random.choice(cat_agent.action_space), chase_counter  # Explore
+    # cat is done playing when it gets tired
+    elif chase_counter >= tired_threshold:
+        cat_agent.x_velocity = 0
+        cat_agent.y_velocity = 0
+        return (0, 0, 0)
+    else:
+        return np.argmax(q_table_cat[cat_agent.pos]), chase_counter  # Exploit
+
+# policy for mouse agent
+# we want the mouse to avoid cat and also be random, it be more exploratory
+def update_policy_mouse(epsilon, mouse_agent, q_table_mouse):
+    if random.uniform(0, 1) < epsilon / 2:
+        return random.choice(mouse_agent.action_space)  # Explore
+    else:
+        return np.argmax(q_table_mouse[mouse_agent.pos])  # Exploit
 
 def run_episode(cat_policy, mouse_policy, environment):
     terminal = False
@@ -130,13 +127,15 @@ if __name__ == '__main__':
     g.visualize()
 
     # create the two agents
-    cat_agent = CatAgent(pos=cat_start_pos)
-    mouse_agent = MouseAgent(pos=mouse_start_pos)
+    cat = CatAgent(pos=cat_start_pos)
+    mouse = MouseAgent(pos=mouse_start_pos)
 
     # create environment
-    env = Environment(g, cat_agent, mouse_agent)
+    env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
+    control_func(env, cat, mouse, n=1, discount_factor=0.99, epsilon=0.1)
+
 
     # visualize the run
     grids = None

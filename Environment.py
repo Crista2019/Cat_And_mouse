@@ -55,7 +55,7 @@ class Environment(object):
         new_cat_pos = self.cat.take_turn(cat_action)
         # if this is a valid move, we keep going
         # otherwise the cat doesn't move (we assume it hits the wall but we don't penalize)
-        if not self.gridworld.is_off_limits(new_cat_pos):
+        if not self.gridworld.is_off_limits(*new_cat_pos):
             self.cat.position = new_cat_pos
         else:
             # keep old pos
@@ -64,11 +64,9 @@ class Environment(object):
         cat_reward = self.cat_reward(new_cat_pos)
 
         # MOUSE TURN
-
-        # maybe we want a sudden change in direction with 10% change to emulate erratic behavior in mouse
         new_mouse_pos = self.mouse.take_turn(mouse_action)
         # if this is a valid move, we keep going
-        if not self.gridworld.is_off_limits(new_mouse_pos):
+        if not self.gridworld.is_off_limits(*new_mouse_pos):
             self.mouse.position = new_mouse_pos
             mouse_reward = self.cat_reward(new_cat_pos)
         else:
