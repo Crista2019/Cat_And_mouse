@@ -33,6 +33,7 @@ Points on the grid represent the cat position, the mouse toy position, obstacles
 !pip install random
 # visualization tools
 !pip install opencv-python
+!brew install ffmpeg
 !pip install matplotlib
 ```
 

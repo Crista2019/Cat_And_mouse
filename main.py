@@ -44,9 +44,14 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
     policy_cat = {s: [1.0 / num_actions] * num_actions for s in state_space}
     policy_mouse = {s: [1.0 / num_actions] * num_actions for s in state_space}
 
+    all_episodes = []
+    all_grids = []
     for _ in range(n):
+        # reset the cat and mouse
         # run one episode to obtain the state/action/reward combo
-        episode = run_episode(policy_cat, policy_mouse, environment)
+        episode, episode_grids = run_episode(policy_cat, policy_mouse, environment)
+        all_episodes.append(episode)
+        all_grids.append(episode_grids)
         # update our q table for cat and mouse
         # make sure to cut the very last episode trial because the reward is "done"
         q_table_cat, new_returns_cat = update_q_table(policy_cat, returns_cat, episode[0][:-1], discount_factor)
@@ -56,7 +61,7 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
         policy_cat = update_policy(policy_cat, state_space, num_actions, q_table_cat, epsilon)
         policy_mouse = update_policy(policy_mouse, state_space, num_actions, q_table_mouse, epsilon)
 
-    return policy_cat, q_table_cat, policy_mouse, q_table_mouse
+    return policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids
 
 def update_q_table(q_values, returns, episode, discount_factor):
     new_q_values = q_values
@@ -88,6 +93,7 @@ def update_policy(policy, state_space, num_actions, q_table, epsilon):
 def run_episode(cat_policy, mouse_policy, environment):
     terminal = False
     episode_t = [[],[]]
+    episode_board = []
 
     cat_probabilities = cat_policy[cat_start_pos]
     mouse_probabilities = mouse_policy[mouse_start_pos]
@@ -109,8 +115,9 @@ def run_episode(cat_policy, mouse_policy, environment):
 
         episode_t[0].append((new_cat_pos, cat_action, cat_reward))
         episode_t[1].append((new_mouse_pos, mouse_action, mouse_reward))
+        episode_board.append(environment.gridworld.grid)
 
-    return episode_t
+    return episode_t, episode_board
 
 if __name__ == '__main__':
     # set the locations where the cat and mouse should start
@@ -131,9 +138,9 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    control_func(env, n=1)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=1)
 
+    print(all_grids[0])
     # visualize the run
-    # grids = None
-    # grids_to_video(grids, output_file='random_grids.mp4', fps=5)
+    grids_to_video(all_grids[0], output_file='random_grids.mp4', fps=5)
 
