@@ -1,29 +1,38 @@
 # local imports
+from matplotlib import colors
+
 from Gridworld import Gridworld
 from Environment import Environment
 from CatAgent import CatAgent
 from MouseAgent import MouseAgent
 # math tools
 import numpy as np
+# list tools
 from itertools import product
+import copy
 import random
 # visualization tools
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-def grids_to_video(grids, output_file='output.mp4', fps=5):
+def grids_to_video(grids, output_file, fps=5):
     # transform list of grids (gridworld.grid arrays) into a video file
     fig, ax = plt.subplots()
-    im = ax.imshow(grids[0], animated=True)
+    cmap = colors.ListedColormap(['#4d4d9fff', '#ba6833ff', '#ff812dff', '#ac9d93ff'])
+    ax.grid(which='minor', color='black', linestyle='-', linewidth=1)
+
+    im = ax.imshow(grids[0], animated=True, cmap=cmap)
 
     def update_fig(i):
-        im.set_array(grids[i])
+        im.set_array(np.array(grids[i]))
         return im,
 
     ani = animation.FuncAnimation(fig, update_fig, frames=len(grids), interval=1000/fps, blit=True)
     ani.save(output_file, writer='ffmpeg', fps=fps)
     plt.close(fig)
+
+all_grids = []
 
 def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
     # implements Monte Carlo control
@@ -45,13 +54,12 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
     policy_mouse = {s: [1.0 / num_actions] * num_actions for s in state_space}
 
     all_episodes = []
-    all_grids = []
     for _ in range(n):
         # reset the cat and mouse
         # run one episode to obtain the state/action/reward combo
-        episode, episode_grids = run_episode(policy_cat, policy_mouse, environment)
+        episode = run_episode(policy_cat, policy_mouse, environment)
         all_episodes.append(episode)
-        all_grids.append(episode_grids)
+
         # update our q table for cat and mouse
         # make sure to cut the very last episode trial because the reward is "done"
         q_table_cat, new_returns_cat = update_q_table(policy_cat, returns_cat, episode[0][:-1], discount_factor)
@@ -93,7 +101,6 @@ def update_policy(policy, state_space, num_actions, q_table, epsilon):
 def run_episode(cat_policy, mouse_policy, environment):
     terminal = False
     episode_t = [[],[]]
-    episode_board = []
 
     cat_probabilities = cat_policy[cat_start_pos]
     mouse_probabilities = mouse_policy[mouse_start_pos]
@@ -105,7 +112,7 @@ def run_episode(cat_policy, mouse_policy, environment):
         cat_action = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
         mouse_action = np.random.choice(range(len(mouse_probabilities)), size=1, p=mouse_probabilities)[0]
 
-        new_cat_pos, cat_reward, new_mouse_pos, mouse_reward = environment.run(cat_action, mouse_action)
+        new_cat_pos, cat_reward, new_mouse_pos, mouse_reward, grid_state = environment.run(cat_action, mouse_action)
 
         if cat_reward == "done" or mouse_reward == "done":
             terminal = True
@@ -115,20 +122,19 @@ def run_episode(cat_policy, mouse_policy, environment):
 
         episode_t[0].append((new_cat_pos, cat_action, cat_reward))
         episode_t[1].append((new_mouse_pos, mouse_action, mouse_reward))
-        episode_board.append(environment.gridworld.grid)
 
-    return episode_t, episode_board
+    return episode_t
 
 if __name__ == '__main__':
     # set the locations where the cat and mouse should start
     # these can be randomly generated or chosen deliberately
-    cat_start_pos = (9, 4)
+    cat_start_pos = (11, 4)
     mouse_start_pos = (10, 5)
 
     g = Gridworld(dimensions=(20, 20), cat_start=cat_start_pos, mouse_start=mouse_start_pos, obstacles=0)
 
     # visualize the track in grid space
-    g.visualize()
+    # g.visualize()
 
     # create the two agents
     cat = CatAgent(pos=cat_start_pos)
@@ -140,7 +146,45 @@ if __name__ == '__main__':
     # get the agents to actually do stuff
     policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=1)
 
-    print(all_grids[0])
-    # visualize the run
-    grids_to_video(all_grids[0], output_file='random_grids.mp4', fps=5)
+    # unpacking the experiment results
+    cat_pos_all = []
+    mouse_pos_all = []
 
+    cat_reward_all = []
+    mouse_reward_all = []
+
+    for ep in all_episodes:
+        cat_pos, cat_action, cat_reward = [],[],[]
+        mouse_pos, mouse_action, mouse_reward = [],[],[]
+        # each trial of a given episode
+        for t in range(len(ep[0])):
+            cat_pos.append(ep[0][t][0])
+            # cat_action.append(ep[0][t][1])
+            cat_reward.append(ep[0][t][2])
+            mouse_pos.append(ep[1][t][0])
+            # mouse_action.append(ep[1][t][1])
+            mouse_reward.append(ep[1][t][2])
+        cat_pos_all.append(cat_pos)
+        mouse_pos_all.append(mouse_pos)
+        cat_reward_all.append(cat_reward)
+        mouse_reward_all.append(mouse_reward)
+
+
+    original_g = copy.deepcopy(g.grid)
+    grids = [original_g]
+    # visualize the run
+    for ep in range(len(cat_pos_all)):
+        for i in range(len(cat_pos_all[0])):
+            new_g = copy.deepcopy(original_g)
+            new_g[np.nonzero(original_g)] = 1
+            new_g[cat_pos_all[ep][i]] = 2
+            new_g[mouse_pos_all[ep][i]] = 3
+            grids.append(new_g)
+        # indicate new episode
+        new_g[np.nonzero(original_g)] = 0
+        grids.append(new_g)
+
+    # # exporting positions data to be animated over colab (due to render difficulty on test computer)
+    # np.save('a.npy', np.array(grids, dtype=float), allow_pickle=True)
+
+    grids_to_video(grids, output_file='yay.mov', fps=5)

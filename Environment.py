@@ -102,13 +102,11 @@ class Environment(object):
             returned_mouse_pos = new_mouse_pos
 
         # update the grid world
-        # TODO
         new_grid = self.gridworld.grid
-        new_grid[old_cat_pos] = 1
+        new_grid[np.nonzero(self.gridworld.grid)] = 1
         new_grid[returned_cat_pos] = 2
-        new_grid[old_mouse_pos] = 1
         new_grid[returned_mouse_pos] = 3
 
         self.gridworld.grid = new_grid
 
-        return returned_cat_pos, cat_reward, returned_mouse_pos, mouse_reward
+        return returned_cat_pos, cat_reward, returned_mouse_pos, mouse_reward, new_grid
