@@ -65,7 +65,7 @@ class Environment(object):
 
         # if this is an obstacle or wall (0), ouchie
         if self.gridworld.is_off_limits(new_pos[0],new_pos[1]):
-            return np.random.normal(-5, 5)
+            return np.random.normal(-5, 1)
 
         if prev_pos == new_pos:
             # mouse toy shouldn't ever stop
@@ -77,7 +77,7 @@ class Environment(object):
                 return np.random.normal(5, 2)
 
         # if we are at nothing (open floor) add a minimal reward?
-        return np.random.normal(1, 1)
+        return np.random.normal(1, .5)
     def run(self, cat_action, mouse_action):
         # runs one step of the simulation
         # takes in the cat_action and mouse action
