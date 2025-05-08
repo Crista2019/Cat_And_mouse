@@ -41,5 +41,23 @@ Points on the grid represent the cat position, the mouse toy position, obstacles
 
 # Usage
 ```
-todo
+# define initial position of agents
+cat_start_pos = (11, 4)
+mouse_start_pos = (10, 5)
+
+# generate a grid world
+g = Gridworld(dimensions=(20, 20), cat_start=cat_start_pos, mouse_start=mouse_start_pos, obstacles=10)
+
+# visualize the track in grid space
+g.visualize()
+
+# create the two agents
+cat = CatAgent(pos=cat_start_pos)
+mouse = MouseAgent(pos=mouse_start_pos)
+
+# create environment
+env = Environment(g, cat, mouse)
+
+# get the agents to actually act, returns the policy (probabilities), q tables, and saved states
+policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=100)
 ```
