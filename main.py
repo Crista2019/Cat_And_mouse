@@ -101,6 +101,7 @@ def update_policy(policy, state_space, num_actions, q_table, epsilon):
     return new_policy
 
 def run_episode(cat_policy, mouse_policy, environment):
+    print("running episode")
     terminal = False
     episode_t = [[],[]]
 
@@ -111,19 +112,19 @@ def run_episode(cat_policy, mouse_policy, environment):
         # print('trial:', len(episode_t[0]))
         # get the probabilities for acting based on policies given the states of our agents
         # use this to select the action
-        cat_action = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
-        mouse_action = np.random.choice(range(len(mouse_probabilities)), size=1, p=mouse_probabilities)[0]
+        cat_a = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
+        mouse_a = np.random.choice(range(len(mouse_probabilities)), size=1, p=mouse_probabilities)[0]
 
-        new_cat_pos, cat_reward, new_mouse_pos, mouse_reward, grid_state = environment.run(cat_action, mouse_action)
+        new_cat_pos, cat_r, new_mouse_pos, mouse_r, grid_state = environment.run(cat_a, mouse_a)
 
-        if cat_reward == "done" or mouse_reward == "done":
+        if cat_r == "done" or mouse_r == "done":
             terminal = True
 
         cat_probabilities = cat_policy[new_cat_pos]
         mouse_probabilities = mouse_policy[new_mouse_pos]
 
-        episode_t[0].append((new_cat_pos, cat_action, cat_reward))
-        episode_t[1].append((new_mouse_pos, mouse_action, mouse_reward))
+        episode_t[0].append((new_cat_pos, cat_a, cat_r))
+        episode_t[1].append((new_mouse_pos, mouse_a, mouse_r))
 
     return episode_t
 
@@ -146,7 +147,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=20)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=100)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -185,8 +186,5 @@ if __name__ == '__main__':
         # indicate new episode
         new_g[np.nonzero(original_g)] = 0
         grids.append(new_g)
-    #
-    # # # exporting positions data to be animated over colab (due to render difficulty on test computer)
-    # # np.save('a.npy', np.array(grids, dtype=float), allow_pickle=True)
-    #
-    grids_to_video(grids, output_file='yay.mov', fps=10)
+    # visualization
+    grids_to_video(grids, output_file='yay.mov', fps=15)

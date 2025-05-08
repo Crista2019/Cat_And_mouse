@@ -21,7 +21,7 @@ class Environment(object):
 
     def cat_reward(self, prev_pos, new_pos, tired_factor):
         # if the cat gets tired, we are done (to avoid infinite play, which is ideal but not realistic)
-        if tired_factor >= 100:
+        if tired_factor >= 50:
             return "done"
 
         # if this is the mouse (3), game over
@@ -33,8 +33,8 @@ class Environment(object):
         # because of the boundary at the walls, the agent can never look out of bounds
         for i,j in [(-1, 0), (1, 0), (0, -1), (0, 1), (1,1), (-1,1), (-1,-1), (1,-1)]:
             if self.gridworld.evaluate(new_pos[0]+i,new_pos[1]+j) == 3:
-                # less bored with interaction
-                self.cat.tired_factor -= 1
+                # boredom does not increase as much if interaction
+                self.cat.tired_factor += 0.5
                 return np.random.normal(10, 1)
 
         # cat doesn't want to hit obstacles either
@@ -44,7 +44,7 @@ class Environment(object):
 
         if prev_pos == new_pos:
             # not moving makes the cat bored
-            self.cat.tired_factor += 2
+            self.cat.tired_factor += 5
             return np.random.normal(-5, 1)
 
         # if this is anything else, slight pos reward (as per optimal foraging theory)
@@ -59,7 +59,7 @@ class Environment(object):
 
         # if this is an obstacle or wall (0), ouchie
         if self.gridworld.is_off_limits(new_pos[0],new_pos[1]):
-            return np.random.normal(-3, 0.25)
+            return "done"
 
         if prev_pos == new_pos:
             # mouse toy shouldn't ever stop
@@ -68,11 +68,10 @@ class Environment(object):
         # if we are in the vicinity of the cat (2 within the 8 blocks surrounding mouse), give higher reward
         for i,j in [(-1, 0), (1, 0), (0, -1), (0, 1), (1,1), (-1,1), (-1,-1), (1,-1)]:
             if self.gridworld.evaluate(new_pos[0]+i,new_pos[1]+j) == 2:
-                return np.random.normal(3, 0.25)
+                return np.random.normal(3, 0.5)
 
         # if we are at nothing (open floor) add a minimal reward?
-        return np.random.normal(2, 0.25)
-
+        return np.random.normal(5, 1)
     def run(self, cat_action, mouse_action):
         # runs one step of the simulation
         # takes in the cat_action and mouse action
