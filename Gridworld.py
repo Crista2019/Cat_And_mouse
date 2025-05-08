@@ -42,11 +42,11 @@ class Gridworld(object):
 
 
     def reset(self):
-        self.grid[np.nonzero(self.gridworld.grid)] = 1
+        self.grid[np.nonzero(self.grid)] = 1
         # setting cat position
-        self.grid[cat_start[1]][cat_start[0]] = 2
+        self.grid[self.cat_start[1]][self.cat_start[0]] = 2
         # setting mouse position
-        self.grid[mouse_start[1]][mouse_start[0]] = 3
+        self.grid[self.mouse_start[1]][self.mouse_start[0]] = 3
 
     def evaluate(self, x, y):
         # returns the value of a valid space

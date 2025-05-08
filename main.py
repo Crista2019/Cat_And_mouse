@@ -55,8 +55,6 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
 
     all_episodes = []
     for _ in range(n):
-        # reset the cat and mouse
-        cat.pos
         # run one episode to obtain the state/action/reward combo
         episode = run_episode(policy_cat, policy_mouse, environment)
         all_episodes.append(episode)
@@ -69,6 +67,9 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
         # use q values to update our policy
         policy_cat = update_policy(policy_cat, state_space, num_actions, q_table_cat, epsilon)
         policy_mouse = update_policy(policy_mouse, state_space, num_actions, q_table_mouse, epsilon)
+
+        # reset the cat and mouse
+        environment.reset()
 
     return policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids
 
@@ -107,7 +108,7 @@ def run_episode(cat_policy, mouse_policy, environment):
     mouse_probabilities = mouse_policy[mouse_start_pos]
 
     while not terminal:
-        print('trial:', len(episode_t[0]))
+        # print('trial:', len(episode_t[0]))
         # get the probabilities for acting based on policies given the states of our agents
         # use this to select the action
         cat_action = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     cat_start_pos = (11, 4)
     mouse_start_pos = (10, 5)
 
-    g = Gridworld(dimensions=(20, 20), cat_start=cat_start_pos, mouse_start=mouse_start_pos, obstacles=0)
+    g = Gridworld(dimensions=(20, 20), cat_start=cat_start_pos, mouse_start=mouse_start_pos, obstacles=10)
 
     # visualize the track in grid space
     # g.visualize()
@@ -145,7 +146,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=10)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=20)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -175,8 +176,7 @@ if __name__ == '__main__':
     grids = [original_g]
     # visualize the run
     for ep in range(len(all_episodes)):
-        for i in range(len(all_episodes[ep])):
-            print(ep,i)
+        for i in range(len(all_episodes[ep][1])):
             new_g = copy.deepcopy(original_g)
             new_g[np.nonzero(original_g)] = 1
             new_g[cat_pos_all[ep][i]] = 2
@@ -185,8 +185,8 @@ if __name__ == '__main__':
         # indicate new episode
         new_g[np.nonzero(original_g)] = 0
         grids.append(new_g)
-
-    # # exporting positions data to be animated over colab (due to render difficulty on test computer)
-    # np.save('a.npy', np.array(grids, dtype=float), allow_pickle=True)
-
-    grids_to_video(grids, output_file='yay.mov', fps=5)
+    #
+    # # # exporting positions data to be animated over colab (due to render difficulty on test computer)
+    # # np.save('a.npy', np.array(grids, dtype=float), allow_pickle=True)
+    #
+    grids_to_video(grids, output_file='yay.mov', fps=10)

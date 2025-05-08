@@ -3,7 +3,7 @@ from itertools import product
 def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are non-negative and less than 3
-    if 0 <= vel < 3:
+    if 0 <= vel < 5:
         return True
     return False
 
@@ -14,6 +14,7 @@ class CatAgent:
     def __init__(self, pos):
         # tuple representing the x, y position of the cat at the start of an episode
         self.position = pos
+        self.init_pos = pos
 
         # combination of all possible changes to vertical and horizontal velocity
         # there are nine possible actions for changing x and y by -1,0,1
@@ -26,10 +27,11 @@ class CatAgent:
         # start out not tired - increases with movement but doubled with no interaction
         self.tired_factor = 0
 
-    def reset(self):
+    def reset(self, pos):
         self.x_velocity = 0
         self.y_velocity = 0
         self.tired_factor = 0
+        self.position = self.init_pos
 
     def update_velocity(self, action):
         # updates based on the action taken

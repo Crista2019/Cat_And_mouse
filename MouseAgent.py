@@ -4,7 +4,7 @@ def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are positive and less than 5
     # we never want the mouse to stop moving!
-    if 0 <= vel < 5:
+    if 1 <= vel < 3:
         return True
     return False
 
@@ -16,6 +16,7 @@ class MouseAgent:
     def __init__(self, pos):
         # tuple representing the x, y position of the mouse at the start of an episode
         self.position = pos
+        self.init_pos = pos
 
         # combination of all possible changes to vertical and horizontal velocity
         # there are nine possible actions for changing x and y by -1,0,1
@@ -25,9 +26,10 @@ class MouseAgent:
         self.x_velocity = 0
         self.y_velocity = 0
 
-    def reset(self):
+    def reset(self, pos):
         self.x_velocity = 0
         self.y_velocity = 0
+        self.position = self.init_pos
 
     def update_velocity(self, action):
         # updates based on the action taken
