@@ -1,5 +1,6 @@
 # local imports
 from matplotlib import colors
+from numpy.ma.core import cumsum
 
 from Gridworld import Gridworld
 from Environment import Environment
@@ -10,7 +11,7 @@ import numpy as np
 # list tools
 from itertools import product
 import copy
-import random
+from itertools import zip_longest
 # visualization tools
 import cv2
 import matplotlib.pyplot as plt
@@ -55,6 +56,7 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
 
     all_episodes = []
     for _ in range(n):
+        print("episode", _)
         # run one episode to obtain the state/action/reward combo
         episode = run_episode(policy_cat, policy_mouse, environment)
         all_episodes.append(episode)
@@ -101,7 +103,6 @@ def update_policy(policy, state_space, num_actions, q_table, epsilon):
     return new_policy
 
 def run_episode(cat_policy, mouse_policy, environment):
-    print("running episode")
     terminal = False
     episode_t = [[],[]]
 
@@ -109,7 +110,6 @@ def run_episode(cat_policy, mouse_policy, environment):
     mouse_probabilities = mouse_policy[mouse_start_pos]
 
     while not terminal:
-        # print('trial:', len(episode_t[0]))
         # get the probabilities for acting based on policies given the states of our agents
         # use this to select the action
         cat_a = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=100)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=5)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -169,8 +169,9 @@ if __name__ == '__main__':
             mouse_reward.append(ep[1][t][2])
         cat_pos_all.append(cat_pos)
         mouse_pos_all.append(mouse_pos)
-        cat_reward_all.append(cat_reward)
-        mouse_reward_all.append(mouse_reward)
+        # don't want to keep in "done"
+        cat_reward_all.append(cat_reward[:-1])
+        mouse_reward_all.append(mouse_reward[:-1])
 
 
     original_g = copy.deepcopy(g.grid)
@@ -187,4 +188,21 @@ if __name__ == '__main__':
         new_g[np.nonzero(original_g)] = 0
         grids.append(new_g)
     # visualization
-    grids_to_video(grids, output_file='yay.mov', fps=15)
+    grids_to_video(grids, output_file='yay.mov', fps=10)
+
+    # plot episode length
+    values = [len(n[0]) for n in all_episodes]
+    plt.plot(values)
+    plt.title('Duration of Episodes')
+    plt.show()
+
+
+    def column_wise_sum(rows):
+        columns = zip_longest(*rows, fillvalue=0)
+        return [sum(col) / len(rows) for col in columns]
+
+    plt.plot(column_wise_sum(cat_reward_all), color="orange")
+    plt.plot(column_wise_sum(mouse_reward_all), color="gray")
+    plt.title('Average Reward')
+    plt.xlabel('Trial')
+    plt.show()

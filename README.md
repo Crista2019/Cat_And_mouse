@@ -36,6 +36,7 @@ Points on the grid represent the cat position, the mouse toy position, obstacles
 !brew install ffmpeg
 !pip install copy
 !pip install matplotlib
+!pip install pandas
 ```
 
 # Usage

@@ -24,8 +24,8 @@ class Environment(object):
         if tired_factor >= 50:
             return "done"
 
-        # if this is the mouse (3), game over
-        if self.gridworld.evaluate(new_pos[0],new_pos[1]) == 3:
+        # if the mouse is now where the cat is (3 replaced by 2), game over
+        if 3 not in self.gridworld.grid:
             return "done"
 
         # if this is near the mouse (3)
@@ -35,7 +35,7 @@ class Environment(object):
             if self.gridworld.evaluate(new_pos[0]+i,new_pos[1]+j) == 3:
                 # boredom does not increase as much if interaction
                 self.cat.tired_factor += 0.5
-                return np.random.normal(10, 1)
+                return np.random.normal(8, 3)
 
         # cat doesn't want to hit obstacles either
         if self.gridworld.is_off_limits(new_pos[0],new_pos[1]):
@@ -50,16 +50,16 @@ class Environment(object):
         # if this is anything else, slight pos reward (as per optimal foraging theory)
         # cats love to zoom
         self.cat.tired_factor += 1
-        return np.random.normal(2, 0.25)
+        return np.random.normal(5, 1)
 
     def mouse_reward(self, prev_pos, new_pos):
-        # if this is the cat (2), game over
-        if self.gridworld.evaluate(new_pos[0],new_pos[1]) == 2:
+        # if the mouse is now where the cat is (2 replaced by 3), game over
+        if 2 not in self.gridworld.grid:
             return "done"
 
         # if this is an obstacle or wall (0), ouchie
         if self.gridworld.is_off_limits(new_pos[0],new_pos[1]):
-            return "done"
+            return np.random.normal(-5, 5)
 
         if prev_pos == new_pos:
             # mouse toy shouldn't ever stop
@@ -68,7 +68,7 @@ class Environment(object):
         # if we are in the vicinity of the cat (2 within the 8 blocks surrounding mouse), give higher reward
         for i,j in [(-1, 0), (1, 0), (0, -1), (0, 1), (1,1), (-1,1), (-1,-1), (1,-1)]:
             if self.gridworld.evaluate(new_pos[0]+i,new_pos[1]+j) == 2:
-                return np.random.normal(3, 0.5)
+                return np.random.normal(5, 2)
 
         # if we are at nothing (open floor) add a minimal reward?
         return np.random.normal(5, 1)
