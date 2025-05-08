@@ -20,7 +20,7 @@ import matplotlib.animation as animation
 def grids_to_video(grids, output_file, fps=5):
     # transform list of grids (gridworld.grid arrays) into a video file
     fig, ax = plt.subplots()
-    cmap = colors.ListedColormap(['#4d4d9fff', '#ba6833ff', '#ff812dff', '#ac9d93ff'])
+    cmap = colors.ListedColormap(['#4d4d9fff', '#ba6833ff', '#ff812dff', '#ac9d93ff', "#4d4d9fff"])
     ax.grid(which='minor', color='black', linestyle='-', linewidth=1)
 
     im = ax.imshow(grids[0], animated=True, cmap=cmap)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     g = Gridworld(dimensions=(20, 20), cat_start=cat_start_pos, mouse_start=mouse_start_pos, obstacles=10)
 
     # visualize the track in grid space
-    # g.visualize()
+    g.visualize()
 
     # create the two agents
     cat = CatAgent(pos=cat_start_pos)
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=5)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=50)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -181,6 +181,8 @@ if __name__ == '__main__':
         for i in range(len(all_episodes[ep][1])):
             new_g = copy.deepcopy(original_g)
             new_g[np.nonzero(original_g)] = 1
+            for o in g.obstacle_coords:
+                new_g[o[1], o[0]] = 4
             new_g[cat_pos_all[ep][i]] = 2
             new_g[mouse_pos_all[ep][i]] = 3
             grids.append(new_g)

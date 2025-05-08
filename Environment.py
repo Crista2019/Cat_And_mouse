@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import copy
 
 class Environment(object):
     # the session terminates if:
@@ -21,7 +22,7 @@ class Environment(object):
 
     def cat_reward(self, prev_pos, new_pos, tired_factor):
         # if the cat gets tired, we are done (to avoid infinite play, which is ideal but not realistic)
-        if tired_factor >= 50:
+        if tired_factor >= 100:
             return "done"
 
         # if the mouse is now where the cat is (3 replaced by 2), game over
@@ -109,8 +110,11 @@ class Environment(object):
             returned_mouse_pos = new_mouse_pos
 
         # update the grid world
-        new_grid = self.gridworld.grid
+        new_grid = copy.deepcopy(self.gridworld.grid)
         new_grid[np.nonzero(self.gridworld.grid)] = 1
+        # add back obstacles
+        for o in self.gridworld.obstacle_coords:
+            new_grid[o[1], o[0]] = 4
         new_grid[returned_cat_pos] = 2
         new_grid[returned_mouse_pos] = 3
 

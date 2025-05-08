@@ -28,6 +28,8 @@ class Gridworld(object):
         # setting mouse position
         self.grid[mouse_start[1]][mouse_start[0]] = 3
 
+        self.obstacle_coords = []
+
         # if there are obstacles (such as furniture, etc), these too are nontraversable
         if obstacles is not None:
             for _ in range(obstacles):
@@ -38,11 +40,16 @@ class Gridworld(object):
                     if obstacle != self.cat_start:
                         if obstacle != self.mouse_start:
                             valid_obstacle = True
-                            self.grid[obstacle[1]][obstacle[0]] = 0
+                            self.obstacle_coords.append((obstacle[1],obstacle[0]))
+        for o in self.obstacle_coords:
+            self.grid[o[1],o[0]] = 4
 
 
     def reset(self):
         self.grid[np.nonzero(self.grid)] = 1
+        # add back obstacles
+        for o in self.obstacle_coords:
+            self.grid[o[1], o[0]] = 4
         # setting cat position
         self.grid[self.cat_start[1]][self.cat_start[0]] = 2
         # setting mouse position
@@ -60,7 +67,7 @@ class Gridworld(object):
             return True
         elif y >= self.bottom_border or y < self.top_border:
             return True
-        elif self.grid[y, x] == 0:
+        elif self.grid[y, x] == 0 or self.grid[y, x] == 4:
             return True
         return False
 
@@ -70,7 +77,7 @@ class Gridworld(object):
     # visualize the gridworld
     def visualize(self):
         fig, ax = plt.subplots()
-        cmap = colors.ListedColormap(['#4d4d9fff', '#ba6833ff', '#ff812dff', '#ac9d93ff'])
+        cmap = colors.ListedColormap(['#4d4d9fff', '#ba6833ff', '#ff812dff', '#ac9d93ff', '#4d4d9fff'])
         ax.imshow(self.grid, cmap=cmap)
         ax.grid(which='minor', color='black', linestyle='-', linewidth=1)
 
