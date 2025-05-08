@@ -59,8 +59,8 @@ def control_func(environment, n, discount_factor=0.99, epsilon=0.1):
         print("episode", _)
         # run one episode to obtain the state/action/reward combo
         episode = run_episode(policy_cat, policy_mouse, environment)
-        all_episodes.append(episode)
 
+        all_episodes.append(episode)
         # update our q table for cat and mouse
         # make sure to cut the very last episode trial because the reward is "done"
         q_table_cat, new_returns_cat = update_q_table(policy_cat, returns_cat, episode[0][:-1], discount_factor)
@@ -114,7 +114,6 @@ def run_episode(cat_policy, mouse_policy, environment):
         # use this to select the action
         cat_a = np.random.choice(range(len(cat_probabilities)), size=1, p=cat_probabilities)[0]
         mouse_a = np.random.choice(range(len(mouse_probabilities)), size=1, p=mouse_probabilities)[0]
-
         new_cat_pos, cat_r, new_mouse_pos, mouse_r, grid_state = environment.run(cat_a, mouse_a)
 
         if cat_r == "done" or mouse_r == "done":
@@ -122,7 +121,6 @@ def run_episode(cat_policy, mouse_policy, environment):
 
         cat_probabilities = cat_policy[new_cat_pos]
         mouse_probabilities = mouse_policy[new_mouse_pos]
-
         episode_t[0].append((new_cat_pos, cat_a, cat_r))
         episode_t[1].append((new_mouse_pos, mouse_a, mouse_r))
 
@@ -147,7 +145,7 @@ if __name__ == '__main__':
     env = Environment(g, cat, mouse)
 
     # get the agents to actually do stuff
-    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=50)
+    policy_cat, q_table_cat, policy_mouse, q_table_mouse, all_episodes, all_grids = control_func(env, n=100)
 
     # unpacking the experiment results
     cat_pos_all = []
@@ -190,7 +188,7 @@ if __name__ == '__main__':
         new_g[np.nonzero(original_g)] = 0
         grids.append(new_g)
     # visualization
-    grids_to_video(grids, output_file='yay.mov', fps=10)
+    grids_to_video(grids, output_file='catMouseRecording.mov', fps=10)
 
     # plot episode length
     values = [len(n[0]) for n in all_episodes]

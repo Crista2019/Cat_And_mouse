@@ -22,7 +22,9 @@ class Environment(object):
 
     def cat_reward(self, prev_pos, new_pos, tired_factor):
         # if the cat gets tired, we are done (to avoid infinite play, which is ideal but not realistic)
-        if tired_factor >= 100:
+        self.cat.tired_factor += 2
+
+        if self.cat.tired_factor >= 50:
             return "done"
 
         # if the mouse is now where the cat is (3 replaced by 2), game over
@@ -35,7 +37,7 @@ class Environment(object):
         for i,j in [(-1, 0), (1, 0), (0, -1), (0, 1), (1,1), (-1,1), (-1,-1), (1,-1)]:
             if self.gridworld.evaluate(new_pos[0]+i,new_pos[1]+j) == 3:
                 # boredom does not increase as much if interaction
-                self.cat.tired_factor += 0.5
+                self.cat.tired_factor -= 1
                 return np.random.normal(8, 3)
 
         # cat doesn't want to hit obstacles either
@@ -50,12 +52,15 @@ class Environment(object):
 
         # if this is anything else, slight pos reward (as per optimal foraging theory)
         # cats love to zoom
-        self.cat.tired_factor += 1
         return np.random.normal(5, 1)
 
     def mouse_reward(self, prev_pos, new_pos):
         # if the mouse is now where the cat is (2 replaced by 3), game over
         if 2 not in self.gridworld.grid:
+            return "done"
+
+        # if cat is tired we want to turn off
+        if self.cat.tired_factor >= 50:
             return "done"
 
         # if this is an obstacle or wall (0), ouchie
@@ -72,7 +77,7 @@ class Environment(object):
                 return np.random.normal(5, 2)
 
         # if we are at nothing (open floor) add a minimal reward?
-        return np.random.normal(5, 1)
+        return np.random.normal(1, 1)
     def run(self, cat_action, mouse_action):
         # runs one step of the simulation
         # takes in the cat_action and mouse action

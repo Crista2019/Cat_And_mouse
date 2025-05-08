@@ -3,7 +3,7 @@ from itertools import product
 def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are non-negative and less than 3
-    if 0 <= vel < 5:
+    if -2 <= vel < 2:
         return True
     return False
 

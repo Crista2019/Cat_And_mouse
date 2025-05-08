@@ -4,7 +4,7 @@ def valid_velocity(vel):
     # we will assume the mouse is faster than the cat
     # valid velocity components are positive and less than 5
     # we never want the mouse to stop moving!
-    if 0 <= vel < 5:
+    if -2 <= vel < 2:
         return True
     return False
 
